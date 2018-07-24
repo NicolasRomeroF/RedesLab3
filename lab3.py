@@ -97,9 +97,9 @@ print("t = " + str(t[-1]))
 
 Tdata,frq=fourier(data,rate)
 graficar("Transformada de Fourier orig sin resample","Frecuencia [hz]","Amplitud [dB]",frq,Tdata)
-new_rate=int(100000*timp)
+new_rate=16*rate
 
-data=signal.resample(data,new_rate)
+data=signal.resample_poly(data,16,1)
 
 timp = len(data)/new_rate
 time=np.linspace(0,timp,len(data))
