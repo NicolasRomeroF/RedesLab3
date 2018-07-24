@@ -23,10 +23,6 @@ def abrirArchivo():
     	data = info[:,dimension-1]
     	perfect = 0
     
-    if data.dtype == 'int16':
-        N = 16 # -> 16-bit wav files
-    elif data.dtype == 'int32':
-        N = 32 # -> 32-bit wav files
 
     return data,rate
 	
@@ -97,9 +93,9 @@ print("t = " + str(t[-1]))
 
 Tdata,frq=fourier(data,rate)
 graficar("Transformada de Fourier orig sin resample","Frecuencia [hz]","Amplitud [dB]",frq,Tdata)
-new_rate=16*rate
+new_rate=5*rate
 
-data=signal.resample_poly(data,16,1)
+data=signal.resample_poly(data,5,1)
 
 timp = len(data)/new_rate
 time=np.linspace(0,timp,len(data))
