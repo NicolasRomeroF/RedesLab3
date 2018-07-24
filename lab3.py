@@ -2,6 +2,7 @@ from scipy.io.wavfile import read,write
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.fftpack import fftfreq, fftshift
+import scipy
 
 
 def abrirArchivo():
@@ -20,12 +21,22 @@ def abrirArchivo():
 		perfect = 0
 	return data,rate
 
+def interpolacion(data,rate): 
+    tiempo = np.linspace(0,len(data)/rate, num=len(data)) 
+    interp = scipy.interpolate.interp1d(tiempo,data) 
+    tiempo2 = np.linspace(0,len(data)/rate, num = tiempo[-1]*100000 )
+    y = interp(tiempo2) 
+    return y 
+
 def modulacionAM(data,rate,mod_index):
-    timp = len(data)/rate
-    t=np.linspace(0,timp,len(data))
-    frecuencuencia_portadora=88100000
-    portadora = np.cos(2*np.pi*frecuencuencia_portadora*t)*mod_index
-    y = data * portadora
+    timp = len(data)/rate 
+    t=np.linspace(0,timp,len(data)) 
+    senal_interp = interpolacion(data,rate) 
+    largo=len(senal_interp) 
+    tiempo= np.linspace(0,largo/100000, num=largo) 
+    frecuencuencia_portadora=50000 
+    portadora = np.cos(2*np.pi*frecuencuencia_portadora*tiempo)*mod_index 
+    y = senal_interp * portadora
     return y
 
 def demodulacionAM(signal,rate,freq_demod):
@@ -61,7 +72,7 @@ def graficar(title,xlabel,ylabel,X,Y):
 data,rate = abrirArchivo()
 timp = len(data)/rate
 t=np.linspace(0,timp,len(data))
-
+print("t = " + str(t[-1]))
 
 senalModulada = modulacionAM(data,rate,0.15)
 senalDemodulada = demodulacionAM(senalModulada,rate,3000)
