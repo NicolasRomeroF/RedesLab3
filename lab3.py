@@ -80,6 +80,7 @@ def fourier(data,rate):
 	return Tdata,frq
 
 def graficar(title,xlabel,ylabel,X,Y):
+    print("Mostrando grafico")
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
