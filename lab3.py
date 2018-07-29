@@ -5,6 +5,7 @@ from scipy.fftpack import fftfreq, fftshift
 from scipy.interpolate import interp1d
 from scipy.signal import resample
 from scipy import signal
+from scipy import integrate
 
 
 def abrirArchivo():
@@ -51,11 +52,21 @@ def demodulacionAM(signal,time,freq_demod):
     return data
 
 def modulacionFM(data,rate,mod_index):
-    timp = len(data)/rate
-    t=np.linspace(0,timp,len(data))
-    frecuencuencia_portadora=3000
-    portadora=2*np.pi*frecuencuencia_portadora*t*mod_index
-    y = np.cos(portadora+data)
+    k=0.15
+    senal_interp = interpolacion(data,rate)
+    largo = len(senal_interp)
+    tiempo = np.linspace(0,len(data)/(rate), num=largo)
+    
+    frecuencia_portadora=20000
+    
+    #wct = 2*np.pi*frecuencia_portadora*tiempo
+    wct = 2*np.pi*frecuencia_portadora*tiempo
+
+    audio_integrate = integrate.cumtrapz(senal_interp, tiempo, initial=0)
+    
+    portadora = np.cos(wct+k*audio_integrate)
+    
+    return portadora
 
 def fourier(data,rate):
 	timp=len(data)/rate
@@ -85,8 +96,8 @@ data,rate = abrirArchivo()
 timp = len(data)/rate
 t=np.linspace(0,timp,len(data))
 
-Tdata,frq=fourier(data,rate)
-graficar("Transformada de Fourier orig sin resample","Frecuencia [hz]","Amplitud [dB]",frq,Tdata)
+#Tdata,frq=fourier(data,rate)
+#graficar("Transformada de Fourier orig sin resample","Frecuencia [hz]","Amplitud [dB]",frq,Tdata)
 new_rate=rate*8
 
 
@@ -101,15 +112,41 @@ data_resample=interpolacion(data,rate)
 
 
 
-Tdata,frq=fourier(data_resample,new_rate)
-graficar("Transformada de Fourier orig resampleada","Frecuencia [hz]","Amplitud [dB]",frq,Tdata)
+#Tdata,frq=fourier(data_resample,new_rate)
+#graficar("Transformada de Fourier orig resampleada","Frecuencia [hz]","Amplitud [dB]",frq,Tdata)
 
-Tdata,frq=fourier(senalModulada,new_rate)
-graficar("Transformada de Fourier modulada","Frecuencia [hz]","Amplitud [dB]",frq,Tdata)
+#Tdata,frq=fourier(senal_demod_filtrada,new_rate)
+#graficar("Transformada de Fourier demodulada y filtrada","Frecuencia [hz]","Amplitud [dB]",frq,Tdata)
+senalModuladaFM = modulacionFM(data,rate, 1)
 
-Tdata,frq=fourier(senalDemodulada,new_rate)
-graficar("Transformada de Fourier demodulada","Frecuencia [hz]","Amplitud [dB]",frq,Tdata)
-
-Tdata,frq=fourier(senal_demod_filtrada,new_rate)
-graficar("Transformada de Fourier demodulada y filtrada","Frecuencia [hz]","Amplitud [dB]",frq,Tdata)
-
+opcion=1
+while opcion != 0:
+    print("""Menú:
+    1.- Mostrar modulación AM
+    2.- Mostrar demodulación AM
+    3.- Mostrar modulación FM
+    4.- Salir""")
+    try:
+        opcion = int(input("Ingrese una opción: "))
+    except:
+        opcion = 6
+    if opcion==1:
+        print("--------------")
+        Tdata,frq=fourier(senalModulada,new_rate)
+        graficar("Transformada de Fourier modulada","Frecuencia [hz]","Amplitud [dB]",frq,Tdata)
+        print("--------------")
+    elif opcion==2:
+        print("--------------")
+        Tdata,frq=fourier(senalDemodulada,new_rate)
+        graficar("Transformada de Fourier demodulada","Frecuencia [hz]","Amplitud [dB]",frq,Tdata)
+        print("--------------")
+    elif opcion==3:
+        print("--------------") 
+        Tdata,frq = fourier(senalModuladaFM, new_rate)
+        graficar("Transformada de Fourier modulada FM","Frecuencia [hz]","Amplitud [dB]",frq,Tdata)
+        print("--------------") 
+    elif opcion > 4 or opcion < 1:
+        print("Opcion no valida, intente otra vez")
+    elif opcion == 4:
+        opcion = 0
+        print("Salir")
