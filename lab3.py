@@ -6,6 +6,7 @@ from scipy.interpolate import interp1d
 from scipy.signal import resample
 from scipy import signal
 from scipy import integrate
+import matplotlib.animation as animation
 
 
 def abrirArchivo():
@@ -95,6 +96,37 @@ def lowpass_filter(data,rate):
     filtered_x = signal.lfilter(fircoef1_low,1.0,data)
     return filtered_x
 
+def init():
+    line.set_data([], [])
+    return line,
+
+def init2():
+    line2.set_data([], [])
+    return line2,
+
+def init3():
+    line2.set_data([], [])
+    return line3,
+
+# animation function.  This is called sequentially
+def animateSenal(i):
+    x = np.linspace(0, 1, 180)
+    y = np.cos(2 * np.pi * (x - 0.01* i)*5)
+    line.set_data(x, y)
+    return line,
+
+def animatePortadora(i):
+    x = np.linspace(0, 1, 180)
+    y = np.cos(2 * np.pi * (x - 0.01* i)*15)
+    line2.set_data(x, y)
+    return line2,
+
+def animateModulada(i):
+    x = np.linspace(0, 1, 180)
+    y = np.cos(2 * np.pi * (x - 0.01* i)*5)*np.cos(2 * np.pi * (x - 0.01* i)*15)
+    line3.set_data(x, y)
+    return line3,
+
 data,rate = abrirArchivo()
 timp = len(data)/rate
 t=np.linspace(0,timp,len(data))
@@ -143,7 +175,8 @@ while opcion != 0:
     2.- Mostrar transformada de Fourier de la modulación AM
     3.- Mostrar transformada de Fourier demodulación AM
     4.- Mostrar transformada de Fourier de la modulación FM
-    5.- Salir""")
+    5.- Ejemplo animado
+    6.- Salir""")
     try:
         opcion = int(input("Ingrese una opción: "))
     except:
@@ -273,8 +306,42 @@ while opcion != 0:
 
         plt.show()
         print("--------------") 
-    elif opcion > 5 or opcion < 1:
-        print("Opcion no valida, intente otra vez")
     elif opcion == 5:
+        fig = plt.figure()
+        ax = plt.axes(xlim=(0, 1), ylim=(-1, 1))
+        line, = ax.plot([], [], lw=2)
+        plt.title('Señal original (coseno frecuencia 5)')
+        plt.xlabel('Tiempo [s]')
+        plt.ylabel('Amplitud')
+
+        anim = animation.FuncAnimation(fig, animateSenal, init_func=init,frames=360, interval=20, blit=True)
+        plt.show()
+
+
+        fig2 = plt.figure()
+        ax2 = plt.axes(xlim=(0, 1), ylim=(-1, 1))
+        line2, = ax2.plot([], [], lw=2)
+        plt.title('Señal portadora (coseno frecuencia 15)')
+        plt.xlabel('Tiempo [s]')
+        plt.ylabel('Amplitud')
+        
+        anim = animation.FuncAnimation(fig2, animatePortadora, init_func=init2,frames=360, interval=20, blit=True)
+        plt.show()
+
+        
+        fig3 = plt.figure()
+        ax3 = plt.axes(xlim=(0, 1), ylim=(-1, 1))
+        line3, = ax3.plot([], [], lw=2)
+        plt.title('Señal modulada')
+        plt.xlabel('Tiempo [s]')
+        plt.ylabel('Amplitud')
+
+        anim = animation.FuncAnimation(fig3, animateModulada, init_func=init3,frames=360, interval=20, blit=True)
+        plt.show()
+   
+        
+    elif opcion > 6 or opcion < 1:
+        print("Opcion no valida, intente otra vez")
+    elif opcion == 6:
         opcion = 0
         print("Salir")
