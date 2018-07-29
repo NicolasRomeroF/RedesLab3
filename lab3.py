@@ -31,10 +31,10 @@ def abrirArchivo():
 def interpolacion(data,rate):
     tiempo = np.linspace(0,len(data)/rate, num=len(data))
     interp = interp1d(tiempo,data)
-    tiempo2 = np.linspace(0,len(data)/rate,len(data)*4)
+    tiempo2 = np.linspace(0,len(data)/rate,len(data)*8)
     y = interp(tiempo2)
-    print (tiempo[-1])
-    print(len(data)/rate)
+    #print (tiempo[-1])
+    #print(len(data)/rate)
     return y
 
 def modulacionAM(data,rate,mod_index):
@@ -44,7 +44,7 @@ def modulacionAM(data,rate,mod_index):
     frecuencuencia_portadora=20000
     portadora = np.cos(2*np.pi*frecuencuencia_portadora*tiempo)*mod_index
     y = senal_interp * portadora
-    graficar("Señal modulada","Tiempo","Amplitud",tiempo,y)
+    #graficar("Señal modulada","Tiempo","Amplitud",tiempo,y)
     
     return y
 
@@ -55,7 +55,7 @@ def demodulacionAM(signal,time,freq_demod):
     return data
 
 def modulacionFM(data,rate,mod_index):
-    k=0.15
+    k=mod_index
     senal_interp = interpolacion(data,rate)
     largo = len(senal_interp)
     tiempo = np.linspace(0,len(data)/(rate), num=largo)
@@ -85,7 +85,6 @@ def graficar(title,xlabel,ylabel,X,Y):
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.plot(X, Y, "-")
-    print("Mostrando grafico")
     plt.show()
 
 def lowpass_filter(data,rate):
@@ -99,6 +98,8 @@ def lowpass_filter(data,rate):
 data,rate = abrirArchivo()
 timp = len(data)/rate
 t=np.linspace(0,timp,len(data))
+
+mod_index=1
 
 #Tdata,frq=fourier(data,rate)
 #graficar("Transformada de Fourier orig sin resample","Frecuencia [hz]","Amplitud [dB]",frq,Tdata)
@@ -116,49 +117,164 @@ new_rate=rate*
 
 #graficar("Señal original","Tiempo","Amplitud",time,data)
 
-time_resample = np.linspace(0,1,num=new_rate)
-senalModulada = modulacionAM(data,rate,1)
-#senalDemodulada = demodulacionAM(senalModulada,time_resample,400)
-#senal_demod_filtrada = lowpass_filter(senalDemodulada,new_rate)
+time_resample = np.linspace(0,len(data)/rate,num=len(data)*8)
+senalModulada = modulacionAM(data,rate,mod_index)
+senalDemodulada = demodulacionAM(senalModulada,time_resample,20000)
+senal_demod_filtrada = lowpass_filter(senalDemodulada,new_rate)
 data_resample=interpolacion(data,rate)
 
-
+frecuencuencia_portadora=20000
+senalPortadora=portadora = np.cos(2*np.pi*frecuencuencia_portadora*time_resample)*mod_index
 
 #Tdata,frq=fourier(data_resample,new_rate)
 #graficar("Transformada de Fourier orig resampleada","Frecuencia [hz]","Amplitud [dB]",frq,Tdata)
 
 #Tdata,frq=fourier(senal_demod_filtrada,new_rate)
 #graficar("Transformada de Fourier demodulada y filtrada","Frecuencia [hz]","Amplitud [dB]",frq,Tdata)
-senalModuladaFM = modulacionFM(data,rate, 1)
+senalModuladaFM = modulacionFM(data,rate, mod_index)
+senalModuladaFM15 = modulacionFM(data,rate, 0.15)
+senalModuladaFM125 = modulacionFM(data,rate, 1.25)
+
 
 opcion=1
 while opcion != 0:
     print("""Menú:
-    1.- Mostrar modulación AM
-    2.- Mostrar demodulación AM
-    3.- Mostrar modulación FM
-    4.- Salir""")
+    1.- Mostrar señal original y señal portadora
+    2.- Mostrar transformada de Fourier de la modulación AM
+    3.- Mostrar transformada de Fourier demodulación AM
+    4.- Mostrar transformada de Fourier de la modulación FM
+    5.- Salir""")
     try:
         opcion = int(input("Ingrese una opción: "))
     except:
         opcion = 6
-    if opcion==1:
-        print("--------------")
-        Tdata,frq=fourier(senalModulada,new_rate)
-        graficar("Transformada de Fourier modulada","Frecuencia [hz]","Amplitud [dB]",frq,Tdata)
-        print("--------------")
+    if opcion == 1:
+        ax1 = plt.subplot(3, 1, 1)
+        plt.title('Señal original')
+        plt.ylabel('Amplitud')
+        plt.xlabel('Tiempo [s]')
+        plt.plot(time_resample,senalModulada, '-')
+
+
+        ax2 = plt.subplot(3, 1, 2)
+        ax2.set_title('Señal portadora')
+        plt.axis([1,1.01,-1.2,1.2])
+        plt.xlabel('Tiempo [s]')
+        plt.ylabel('Amplitud')
+        plt.plot(time_resample,senalPortadora, '-')
+
+        ax3 = plt.subplot(3, 1, 3)
+        ax3.set_title('Señal modulada')
+        plt.xlabel('Tiempo [s]')
+        plt.ylabel('Amplitud')
+        plt.plot(time_resample,senalModulada, '-')
+
+        plt.tight_layout()
+
+        plt.show()
     elif opcion==2:
         print("--------------")
-        Tdata,frq=fourier(senalDemodulada,new_rate)
-        graficar("Transformada de Fourier demodulada","Frecuencia [hz]","Amplitud [dB]",frq,Tdata)
+
+        Tdata,frq=fourier(data_resample,new_rate)
+
+        ax = plt.subplot(4, 1, 1)
+        plt.title('Fourier señal original')
+        plt.xlabel('Frecuancia [hz]')
+        plt.ylabel('Amplitud')
+        plt.plot(frq,Tdata, '-')
+
+        Tdata15,frq15=fourier(senalModulada*0.15,new_rate)
+
+        ax1 = plt.subplot(4, 1, 2)
+        plt.title('Fourier AM al 15%')
+        plt.xlabel('Frecuencia [hz]')
+        plt.ylabel('Amplitud')
+        plt.plot(frq15,Tdata15, '-')
+
+        Tdata100,frq100=fourier(senalModulada,new_rate)
+
+        ax2 = plt.subplot(4, 1, 3)
+        ax2.set_title('Fourier AM al 100%')
+        plt.xlabel('Frecuencia [hz]')
+        plt.ylabel('Amplitud')
+        plt.plot(frq100,Tdata100, '-')
+
+        Tdata125,frq125=fourier(senalModulada*1.25,new_rate)
+
+        ax3 = plt.subplot(4, 1, 4)
+        ax3.set_title('Fourier AM al 125%')
+        plt.xlabel('Frecuencia [hz]')
+        plt.ylabel('Amplitud')
+        plt.plot(frq125,Tdata125, '-')
+
+        plt.tight_layout()
+
+        plt.show()
         print("--------------")
     elif opcion==3:
+        print("--------------")
+        Tdata,frq=fourier(senalDemodulada,new_rate)
+        TdataFiltrada,frqFiltrada=fourier(senal_demod_filtrada,new_rate)
+
+        
+        ax1 = plt.subplot(2, 1, 1)
+        plt.title('Fourier señal demodulada')
+        plt.ylabel('Amplitud')
+        plt.xlabel('Frecuencia [hz]')
+        plt.plot(frq,Tdata, '-')
+
+
+        ax2 = plt.subplot(2, 1, 2)
+        plt.title('Fourier señal demodulada y filtrada')
+        plt.ylabel('Amplitud')
+        plt.xlabel('Frecuencia [hz]')
+        plt.plot(frqFiltrada,TdataFiltrada, '-')
+
+        plt.tight_layout()
+
+        plt.show()
+
+        print("--------------")
+    elif opcion==4:
         print("--------------") 
-        Tdata,frq = fourier(senalModuladaFM, new_rate)
-        graficar("Transformada de Fourier modulada FM","Frecuencia [hz]","Amplitud [dB]",frq,Tdata)
+        Tdata,frq=fourier(data_resample,new_rate)
+
+        ax = plt.subplot(4, 1, 1)
+        plt.title('Fourier señal original')
+        plt.xlabel('Frecuancia [hz]')
+        plt.ylabel('Amplitud')
+        plt.plot(frq,Tdata, '-')
+
+        Tdata15,frq15 = fourier(senalModuladaFM15, new_rate)
+
+        ax1 = plt.subplot(4, 1, 2)
+        plt.title('Fourier FM al 15%')
+        plt.xlabel('Frecuencia [hz]')
+        plt.ylabel('Amplitud')
+        plt.plot(frq15,Tdata15, '-')
+
+        Tdata100,frq100 = fourier(senalModuladaFM, new_rate)
+
+        ax2 = plt.subplot(4, 1, 3)
+        ax2.set_title('Fourier FM al 100%')
+        plt.xlabel('Frecuencia [hz]')
+        plt.ylabel('Amplitud')
+        plt.plot(frq100,Tdata100, '-')
+
+        Tdata125,frq125=fourier(senalModuladaFM125,new_rate)
+
+        ax3 = plt.subplot(4, 1, 4)
+        ax3.set_title('Fourier FM al 125%')
+        plt.xlabel('Frecuencia [hz]')
+        plt.ylabel('Amplitud')
+        plt.plot(frq125,Tdata125, '-')
+
+        plt.tight_layout()
+
+        plt.show()
         print("--------------") 
-    elif opcion > 4 or opcion < 1:
+    elif opcion > 5 or opcion < 1:
         print("Opcion no valida, intente otra vez")
-    elif opcion == 4:
+    elif opcion == 5:
         opcion = 0
         print("Salir")
