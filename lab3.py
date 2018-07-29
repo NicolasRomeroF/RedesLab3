@@ -110,20 +110,20 @@ def init3():
 
 # animation function.  This is called sequentially
 def animateSenal(i):
-    x = np.linspace(0, 1, 180)
+    x = np.linspace(0, 1, 1000)
     y = np.cos(2 * np.pi * (x - 0.01* i)*5)
     line.set_data(x, y)
     return line,
 
 def animatePortadora(i):
-    x = np.linspace(0, 1, 180)
-    y = np.cos(2 * np.pi * (x - 0.01* i)*15)
+    x = np.linspace(0, 1, 1000)
+    y = np.cos(2 * np.pi * (x - 0.01* i)*20)
     line2.set_data(x, y)
     return line2,
 
 def animateModulada(i):
-    x = np.linspace(0, 1, 180)
-    y = np.cos(2 * np.pi * (x - 0.01* i)*5)*np.cos(2 * np.pi * (x - 0.01* i)*15)
+    x = np.linspace(0, 1, 1000)
+    y = np.cos(2 * np.pi * (x - 0.01* i)*5)*np.cos(2 * np.pi * (x - 0.01* i)*20)
     line3.set_data(x, y)
     return line3,
 
@@ -182,6 +182,7 @@ while opcion != 0:
     except:
         opcion = 6
     if opcion == 1:
+        print("Mostrando grafico")
         ax1 = plt.subplot(3, 1, 1)
         plt.title('Señal original')
         plt.ylabel('Amplitud')
@@ -197,7 +198,7 @@ while opcion != 0:
         plt.plot(time_resample,senalPortadora, '-')
 
         ax3 = plt.subplot(3, 1, 3)
-        ax3.set_title('Señal modulada')
+        ax3.set_title('Señal modulada AM')
         plt.xlabel('Tiempo [s]')
         plt.ylabel('Amplitud')
         plt.plot(time_resample,senalModulada, '-')
@@ -207,6 +208,7 @@ while opcion != 0:
         plt.show()
     elif opcion==2:
         print("--------------")
+        print("Mostrando grafico")
 
         Tdata,frq=fourier(data_resample,new_rate)
 
@@ -246,6 +248,7 @@ while opcion != 0:
         print("--------------")
     elif opcion==3:
         print("--------------")
+        print("Mostrando grafico")
         Tdata,frq=fourier(senalDemodulada,new_rate)
         TdataFiltrada,frqFiltrada=fourier(senal_demod_filtrada,new_rate)
 
@@ -269,7 +272,8 @@ while opcion != 0:
 
         print("--------------")
     elif opcion==4:
-        print("--------------") 
+        print("--------------")
+        print("Mostrando grafico") 
         Tdata,frq=fourier(data_resample,new_rate)
 
         ax = plt.subplot(4, 1, 1)
@@ -307,6 +311,7 @@ while opcion != 0:
         plt.show()
         print("--------------") 
     elif opcion == 5:
+        print("Mostrando grafico")
         fig = plt.figure()
         ax = plt.axes(xlim=(0, 1), ylim=(-1, 1))
         line, = ax.plot([], [], lw=2)
@@ -321,7 +326,7 @@ while opcion != 0:
         fig2 = plt.figure()
         ax2 = plt.axes(xlim=(0, 1), ylim=(-1, 1))
         line2, = ax2.plot([], [], lw=2)
-        plt.title('Señal portadora (coseno frecuencia 15)')
+        plt.title('Señal portadora (coseno frecuencia 20)')
         plt.xlabel('Tiempo [s]')
         plt.ylabel('Amplitud')
         
