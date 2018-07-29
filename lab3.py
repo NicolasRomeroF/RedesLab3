@@ -63,7 +63,6 @@ def modulacionFM(data,rate,mod_index):
     
     frecuencia_portadora=20000
     
-    #wct = 2*np.pi*frecuencia_portadora*tiempo
     wct = 2*np.pi*frecuencia_portadora*tiempo
 
     audio_integrate = integrate.cumtrapz(senal_interp, tiempo, initial=0)
