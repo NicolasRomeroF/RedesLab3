@@ -8,7 +8,9 @@ from scipy import signal
 from scipy import integrate
 import matplotlib.animation as animation
 
-
+'''
+Funcion que lee el archivo de entrada y retorna la señal junto con su tasa de muestreo
+'''
 def abrirArchivo():
     rate,info = read("handel.wav")
     print("El rate del archivo es: " + str(rate))
@@ -27,8 +29,10 @@ def abrirArchivo():
 
 
     return data,rate
-	
-
+'''
+Funcion que dada una señal y su tasa de muestreo, retorna 
+la misma señal con una tasa de muestreo 8 veces mayor.
+'''	
 def interpolacion(data,rate):
     tiempo = np.linspace(0,len(data)/rate, num=len(data))
     interp = interp1d(tiempo,data)
@@ -38,6 +42,11 @@ def interpolacion(data,rate):
     #print(len(data)/rate)
     return y
 
+'''
+Funcion que recibe como entrada una señal, su tasa de muestreo y el indice 
+de modulacion y retorna la señal modulada AM en la frecuencia 20000 con el 
+indice de modulacion dado.
+'''
 def modulacionAM(data,rate,mod_index):
     senal_interp = interpolacion(data,rate)
     largo=len(senal_interp)
@@ -49,12 +58,21 @@ def modulacionAM(data,rate,mod_index):
     
     return y
 
+'''
+Funcion que dado una señal junto a los tiempos y la frecuencia 
+de modulacion, retorna la señal demodulada.
+'''
 def demodulacionAM(signal,time,freq_demod):
     t=time
     portadora = np.cos(2*np.pi*freq_demod*t)
     data = signal * portadora
     return data
 
+'''
+Funcion que recibe como entrada una señal, su tasa de muestreo y el indice 
+de modulacion y retorna la señal modulada FM en la frecuencia 20000 con el 
+indice de modulacion dado.
+'''
 def modulacionFM(data,rate,mod_index):
     k=mod_index
     senal_interp = interpolacion(data,rate)
@@ -72,6 +90,9 @@ def modulacionFM(data,rate,mod_index):
     
     return portadora
 
+'''
+Funcion que aplica la transformada de Fourier sobre una señal.
+'''
 def fourier(data,rate):
 	timp=len(data)/rate
 	Tdata = np.fft.fft(data)
@@ -80,6 +101,9 @@ def fourier(data,rate):
 	frq=fftshift(frq)
 	return Tdata,frq
 
+'''
+Funcion que grafica los datos entregados.
+'''
 def graficar(title,xlabel,ylabel,X,Y):
     print("Mostrando grafico")
     plt.title(title)
@@ -88,6 +112,9 @@ def graficar(title,xlabel,ylabel,X,Y):
     plt.plot(X, Y, "-")
     plt.show()
 
+'''
+Funcion que aplica un filtro paso bajo a una señal dada.
+'''
 def lowpass_filter(data,rate):
     numtaps=1001
     nyq_rate=rate/2
@@ -96,6 +123,9 @@ def lowpass_filter(data,rate):
     filtered_x = signal.lfilter(fircoef1_low,1.0,data)
     return filtered_x
 
+'''
+Grupo de funciones usadas para inicilizar los datos para crear un grafico animado
+'''
 def init():
     line.set_data([], [])
     return line,
@@ -108,7 +138,9 @@ def init3():
     line2.set_data([], [])
     return line3,
 
-# animation function.  This is called sequentially
+'''
+Grupo de funciones que permiten setear las funciones a ser animadas
+'''
 def animateSenal(i):
     x = np.linspace(0, 1, 1000)
     y = np.cos(2 * np.pi * (x - 0.01* i)*5)
@@ -127,27 +159,20 @@ def animateModulada(i):
     line3.set_data(x, y)
     return line3,
 
+#BLOQUE PRINCIPAL
+
 data,rate = abrirArchivo()
 timp = len(data)/rate
 t=np.linspace(0,timp,len(data))
 
 mod_index=1
 
-#Tdata,frq=fourier(data,rate)
-#graficar("Transformada de Fourier orig sin resample","Frecuencia [hz]","Amplitud [dB]",frq,Tdata)
 new_rate=rate*8
 
 
 timp = len(data)/rate
 time=np.linspace(0,timp,len(data)*8)
-'''
-rate=2500
-time = np.linspace(0,1,num=rate)
-data = np.cos(2*np.pi*100*time)
-new_rate=rate*
-'''
 
-#graficar("Señal original","Tiempo","Amplitud",time,data)
 
 time_resample = np.linspace(0,len(data)/rate,num=len(data)*8)
 senalModulada = modulacionAM(data,rate,mod_index)
@@ -158,11 +183,6 @@ data_resample=interpolacion(data,rate)
 frecuencuencia_portadora=20000
 senalPortadora=portadora = np.cos(2*np.pi*frecuencuencia_portadora*time_resample)*mod_index
 
-#Tdata,frq=fourier(data_resample,new_rate)
-#graficar("Transformada de Fourier orig resampleada","Frecuencia [hz]","Amplitud [dB]",frq,Tdata)
-
-#Tdata,frq=fourier(senal_demod_filtrada,new_rate)
-#graficar("Transformada de Fourier demodulada y filtrada","Frecuencia [hz]","Amplitud [dB]",frq,Tdata)
 senalModuladaFM = modulacionFM(data,rate, mod_index)
 senalModuladaFM15 = modulacionFM(data,rate, 0.15)
 senalModuladaFM125 = modulacionFM(data,rate, 1.25)
